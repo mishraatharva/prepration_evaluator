@@ -244,11 +244,9 @@ This combination of AI assistance and iterative debugging helped ensure the syst
 
 Potential enhancements include:
 
-- Implementing Item Response Theory (IRT) based adaptive algorithms
 - Adding topic-level skill tracking
 - Generating LLM explanations for incorrect answers
 - Visualizing student progress analytics
-- Building a full AI tutoring workflow
 
 ---
 
