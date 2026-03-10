@@ -116,8 +116,8 @@ Frontend
 
 1. Clone the repository
 
-git clone https://github.com/your-username/adaptive-gre-test.git  
-cd adaptive-gre-test
+git clone https://github.com/mishraatharva/prepration_evaluator.git
+cd prepration_evaluator
 
 2. Create virtual environment
 
@@ -141,8 +141,8 @@ pip install -r requirements.txt
 
 Create `.env` file
 
-GROQ_API_KEY=your_groq_api_key  
-MONGO_URI=your_mongodb_connection_string
+GROQ_API_KEY=your_groq_api_key
+UPDATE Mongo_db uri in sr.config
 
 6. Run the application
 
