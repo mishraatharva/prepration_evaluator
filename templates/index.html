@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Adaptive GRE Test</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+        }
+
+        .container {
+            width: 650px;
+            margin: 80px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .option {
+            margin: 10px 0;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #2f80ed;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1c60b3;
+        }
+
+        #resultBtn {
+            display: none;
+        }
+
+        .report {
+            margin-top: 30px;
+            background: #f9fafc;
+            padding: 20px;
+            border-radius: 6px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Adaptive GRE Test</h2>
+
+        <div id="questionBox"></div>
+
+        <div id="optionsBox"></div>
+
+        <button id="submitBtn" onclick="submitAnswer()">Submit</button>
+
+        <button id="resultBtn" onclick="getResults()">Get Learning Plan</button>
+
+        <div id="reportBox"></div>
+
+    </div>
+
+
+    <script>
+
+        let sessionId = null
+        let currentQuestionId = null
+
+        let user_answers = []
+
+
+        // Start test automatically
+        startSession()
+
+
+
+        async function startSession() {
+
+            try {
+
+                const response = await fetch("/start-session", { method: "POST" })
+
+                const data = await response.json()
+
+                sessionId = data.session_id
+
+                renderQuestion(data)
+
+            } catch (error) {
+
+                console.error("Error starting session:", error)
+
+            }
+
+        }
+
+
+
+        // Render question
+        function renderQuestion(data) {
+
+            currentQuestionId = data.question_id
+
+            document.getElementById("questionBox").innerHTML =
+                "<h3>" + data.question + "</h3>"
+
+            let html = ""
+
+            data.options.forEach(option => {
+
+                html += `
+<div class="option">
+<input type="radio" name="answer" value="${option}">
+${option}
+</div>
+`
+
+            })
+
+            document.getElementById("optionsBox").innerHTML = html
+
+        }
+
+
+
+        // Submit answer
+        async function submitAnswer() {
+
+            let selected = document.querySelector('input[name="answer"]:checked')
+
+            if (!selected) {
+
+                alert("Please select an answer")
+                return
+
+            }
+
+            let answer = selected.value
+
+            user_answers.push({
+                question_id: currentQuestionId,
+                answer: answer
+            })
+
+            try {
+
+                const response = await fetch("/submit-answer", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        question_id: currentQuestionId,
+                        answer: answer
+                    })
+
+                })
+
+                const data = await response.json()
+
+
+                // TEST COMPLETED
+                if (data.test_completed) {
+
+                    document.getElementById("questionBox").innerHTML =
+                        "<h2>Test Completed</h2>"
+
+                    document.getElementById("optionsBox").innerHTML =
+                        "<p><b>Final Ability Score:</b> " + data.final_ability + "</p>"
+
+                    document.getElementById("submitBtn").style.display = "none"
+
+                    document.getElementById("resultBtn").style.display = "block"
+
+                    return
+
+                }
+
+
+                // Load next question
+                renderQuestion(data)
+
+            } catch (error) {
+
+                console.error("Error submitting answer:", error)
+
+            }
+
+        }
+
+
+
+        // GET AI REPORT
+        async function getResults() {
+
+            try {
+
+                const response = await fetch("/generate-report/" + sessionId)
+
+                const data = await response.json()
+
+                let html = `<div class="report">`
+
+                html += `<h3>Incorrect Questions</h3>`
+
+                if (data.incorrect_questions.length === 0) {
+
+                    html += `<p>Great job! You answered everything correctly.</p>`
+
+                } else {
+
+                    data.incorrect_questions.forEach(q => {
+
+                        html += `
+<p>
+<b>Question:</b> ${q.question}<br>
+<b>Your Answer:</b> ${q.answer}<br>
+<b>Correct Answer:</b> ${q.correct_answer}
+</p>
+<hr>
+`
+
+                    })
+
+                }
+
+
+                html += `<h3>AI Personalized Study Plan</h3>`
+
+                html += `<p style="white-space:pre-line;">${data.learning_plan}</p>`
+
+                html += `</div>`
+
+                document.getElementById("reportBox").innerHTML = html
+
+            } catch (error) {
+
+                console.error("Error generating report:", error)
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>

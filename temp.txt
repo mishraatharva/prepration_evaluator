@@ -1,0 +1,16 @@
+pandas
+ipykernel
+scikit-learn==1.4.2
+seaborn
+matplotlib
+transformers[torch]
+datasets
+accelerate
+packaging
+
+fastapi 
+uvicorn
+python-multipart 
+openai-whisper
+gtts
+faker

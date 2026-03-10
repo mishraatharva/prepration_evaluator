@@ -1,0 +1,13 @@
+ipykernel
+pymongo
+langchain_groq
+python_dotenv
+pyprojroot
+fastapi 
+uvicorn
+numpy
+pandas
+jinja2
+langchain 
+langchain-groq 
+python-dotenv
